@@ -10,7 +10,6 @@ import (
 func NewKafkaProducer() *ckafka.Producer {
 	configMap := &ckafka.ConfigMap{
 		"bootstrap.servers": os.Getenv("KafkaBootstrapServers"),
-		"group.id":          os.Getenv("KafkaConsumerGroupId"),
 	}
 
 	p, err := ckafka.NewProducer(configMap)
