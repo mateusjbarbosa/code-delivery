@@ -27,7 +27,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
               groupId:
                 !process.env.KAFKA_CONSUMER_GROUP_ID ||
                 process.env.KAFKA_CONSUMER_GROUP_ID === ''
-                  ? 'my-consumer-' + Math.random()
+                  ? 'my-producer-' + Math.random()
                   : process.env.KAFKA_CONSUMER_GROUP_ID,
             },
           },
