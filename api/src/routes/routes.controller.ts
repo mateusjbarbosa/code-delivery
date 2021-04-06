@@ -56,10 +56,10 @@ export class RoutesController implements OnModuleInit {
   @Get(':id/start')
   startRoute(@Param('id') id: string) {
     this.kafkaProducer.send({
-      topic: 'route.new-direction',
+      topic: process.env.KAFKA_PRODUCER_TOPIC,
       messages: [
         {
-          key: 'route.new-direction',
+          key: process.env.KAFKA_PRODUCER_TOPIC,
           value: JSON.stringify({ routeId: id, clientId: '' }),
         },
       ],
