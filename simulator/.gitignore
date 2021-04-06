@@ -1,0 +1,5 @@
+# OS files
+.env
+
+# Go files
+go.sum
