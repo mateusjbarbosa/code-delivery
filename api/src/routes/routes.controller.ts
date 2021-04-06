@@ -1,11 +1,28 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Inject,
+  OnModuleInit,
+} from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
+import { ClientKafka } from '@nestjs/microservices';
+import { Producer } from '@nestjs/microservices/external/kafka.interface';
 
 @Controller('routes')
-export class RoutesController {
-  constructor(private readonly routesService: RoutesService) {}
+export class RoutesController implements OnModuleInit {
+  private kafkaProducer: Producer;
+
+  constructor(
+    private readonly routesService: RoutesService,
+    @Inject('KAFKA_SERVICE') private kafkaClient: ClientKafka,
+  ) {}
 
   @Post()
   create(@Body() createRouteDto: CreateRouteDto) {
@@ -30,5 +47,25 @@ export class RoutesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.routesService.remove(+id);
+  }
+
+  async onModuleInit() {
+    this.kafkaProducer = await this.kafkaClient.connect();
+  }
+
+  @Get(':id/start')
+  startRoute(@Param('id') id: string) {
+    this.kafkaProducer.send({
+      topic: process.env.KAFKA_PRODUCER_TOPIC,
+      messages: [
+        {
+          key: process.env.KAFKA_PRODUCER_TOPIC,
+          value: JSON.stringify({
+            routeId: id,
+            clientId: '',
+          }),
+        },
+      ],
+    });
   }
 }
