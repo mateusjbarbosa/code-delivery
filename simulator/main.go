@@ -5,7 +5,10 @@ import (
 	"log"
 
 	"github.com/joho/godotenv"
-	"github.com/mateusjbarbosa/code-delivery/simulator/application/route"
+	"github.com/mateusjbarbosa/code-delivery/simulator/infra/kafka"
+
+	ckafka "github.com/confluentinc/confluent-kafka-go/kafka"
+	kafkaSimulator "github.com/mateusjbarbosa/code-delivery/simulator/application/kafka"
 )
 
 func init() {
@@ -16,13 +19,13 @@ func init() {
 }
 
 func main() {
-	route := route.Route{
-		ID:       "1",
-		ClientID: "1",
+	msgChan := make(chan *ckafka.Message)
+	consumer := kafka.NewKafkaConsumer(msgChan)
+
+	go consumer.Consume()
+
+	for msg := range msgChan {
+		fmt.Println(string(msg.Value))
+		go kafkaSimulator.Produce(msg)
 	}
-	route.LoadPositions()
-
-	routeJson, _ := route.ExportJsonPositions()
-
-	fmt.Println(routeJson)
 }
