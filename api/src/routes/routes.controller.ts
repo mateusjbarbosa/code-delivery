@@ -60,10 +60,7 @@ export class RoutesController implements OnModuleInit {
       messages: [
         {
           key: 'route.new-direction',
-          value: JSON.stringify({
-            routeId: id,
-            clientId: '',
-          }),
+          value: JSON.stringify({ routeId: id, clientId: '' }),
         },
       ],
     });

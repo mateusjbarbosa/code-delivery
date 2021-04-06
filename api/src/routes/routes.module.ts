@@ -7,12 +7,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      {
-        name: Route.name,
-        schema: RouteSchema,
-      },
-    ]),
+    MongooseModule.forFeature([{ name: Route.name, schema: RouteSchema }]),
     ClientsModule.registerAsync([
       {
         name: 'KAFKA_SERVICE',
@@ -27,7 +22,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
               groupId:
                 !process.env.KAFKA_CONSUMER_GROUP_ID ||
                 process.env.KAFKA_CONSUMER_GROUP_ID === ''
-                  ? 'my-producer-' + Math.random()
+                  ? 'code-delivery-' + Math.random()
                   : process.env.KAFKA_CONSUMER_GROUP_ID,
             },
           },

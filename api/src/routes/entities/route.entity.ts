@@ -6,6 +6,9 @@ export type RouteDocument = Route & Document;
 @Schema()
 export class Route {
   @Prop()
+  _id: string;
+
+  @Prop()
   title: string;
 
   @Prop(
@@ -14,10 +17,7 @@ export class Route {
       lng: { type: Number },
     }),
   )
-  startPosition: {
-    lat: number;
-    lng: number;
-  };
+  startPosition: { lat: number; lng: number };
 
   @Prop(
     raw({
@@ -25,10 +25,7 @@ export class Route {
       lng: { type: Number },
     }),
   )
-  endPosition: {
-    lat: number;
-    lng: number;
-  };
+  endPosition: { lat: number; lng: number };
 }
 
 export const RouteSchema = SchemaFactory.createForClass(Route);
