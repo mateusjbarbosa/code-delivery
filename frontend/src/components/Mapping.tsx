@@ -6,6 +6,8 @@ import { Loader } from "google-maps";
 
 import { getCurrentPosition } from "../util/geolocation";
 
+import { makeCarIcon, makeMarkerIcon, Map } from "../util/map";
+
 import { Route } from "../util/models";
 
 import { API_URL } from "../util/consts";
@@ -18,7 +20,7 @@ export const Mapping = (props: Props) => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [routeIdSelected, setRouteIdSelected] = useState<string>("");
 
-  const googleMapsRef = useRef<google.maps.Map>();
+  const googleMapsRef = useRef<Map>();
 
   useEffect(() => {
     fetch(`${API_URL}/routes`)
@@ -35,16 +37,32 @@ export const Mapping = (props: Props) => {
 
       const divMap = document.getElementById("map") as HTMLElement;
 
-      googleMapsRef.current = new google.maps.Map(divMap, {
+      googleMapsRef.current = new Map(divMap, {
         zoom: 15,
         center: position,
       });
     })();
   }, []);
 
-  const startRoute = useCallback((e: FormEvent) => {
-    e.preventDefault();
-  }, []);
+  const startRoute = useCallback(
+    (e: FormEvent) => {
+      e.preventDefault();
+
+      const route = routes.find((route) => route._id === routeIdSelected);
+
+      googleMapsRef.current?.addRoute(routeIdSelected, {
+        currentMarkerOptions: {
+          position: route?.startPosition,
+          icon: makeCarIcon("#000000"),
+        },
+        endMarkerOptions: {
+          position: route?.endPosition,
+          icon: makeMarkerIcon("#000000"),
+        },
+      });
+    },
+    [routeIdSelected, routes]
+  );
 
   return (
     <Grid container style={{ width: "100%", height: "100%" }}>
