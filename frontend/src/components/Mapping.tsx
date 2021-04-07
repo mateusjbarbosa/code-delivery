@@ -13,12 +13,13 @@ import { Loader } from "google-maps";
 
 import { sample, shuffle } from "lodash";
 
+import { useSnackbar } from "notistack";
+
+import { RouteExistsError } from "../errors/route-exists.error";
+
 import { getCurrentPosition } from "../util/geolocation";
-
 import { makeCarIcon, makeMarkerIcon, Map } from "../util/map";
-
 import { Route } from "../util/models";
-
 import { API_URL } from "../util/consts";
 
 const googleMapsLoader = new Loader(process.env.REACT_APP_GOOGLE_API_KEY);
@@ -41,6 +42,8 @@ export const Mapping: FunctionComponent = () => {
   const [routeIdSelected, setRouteIdSelected] = useState<string>("");
 
   const googleMapsRef = useRef<Map>();
+
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     fetch(`${API_URL}/routes`)
@@ -72,18 +75,29 @@ export const Mapping: FunctionComponent = () => {
 
       const color = sample(shuffle(colors)) as string;
 
-      googleMapsRef.current?.addRoute(routeIdSelected, {
-        currentMarkerOptions: {
-          position: route?.startPosition,
-          icon: makeCarIcon(color),
-        },
-        endMarkerOptions: {
-          position: route?.endPosition,
-          icon: makeMarkerIcon(color),
-        },
-      });
+      try {
+        googleMapsRef.current?.addRoute(routeIdSelected, {
+          currentMarkerOptions: {
+            position: route?.startPosition,
+            icon: makeCarIcon(color),
+          },
+          endMarkerOptions: {
+            position: route?.endPosition,
+            icon: makeMarkerIcon(color),
+          },
+        });
+      } catch (error) {
+        if (error instanceof RouteExistsError) {
+          enqueueSnackbar(
+            `${route?.title} já adicionado, espere sua finalização`,
+            { variant: "error" }
+          );
+          return;
+        }
+        throw error;
+      }
     },
-    [routeIdSelected, routes]
+    [routeIdSelected, routes, enqueueSnackbar]
   );
 
   return (
