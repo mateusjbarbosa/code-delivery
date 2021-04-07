@@ -15,6 +15,8 @@ import { sample, shuffle } from "lodash";
 
 import { useSnackbar } from "notistack";
 
+import { Navbar } from "./Navbar";
+
 import { RouteExistsError } from "../errors/route-exists.error";
 
 import { getCurrentPosition } from "../util/geolocation";
@@ -123,6 +125,7 @@ export const Mapping: FunctionComponent = () => {
   return (
     <Grid container className={classes.root}>
       <Grid item sm={4} xs={12}>
+        <Navbar />
         <form onSubmit={startRoute} className={classes.form}>
           <Select
             fullWidth
