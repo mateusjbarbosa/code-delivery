@@ -70,50 +70,6 @@ export const Mapping: FunctionComponent = () => {
 
   const { enqueueSnackbar } = useSnackbar();
 
-  useEffect(() => {
-    fetch(`${API_URL}/routes`)
-      .then((data) => data.json())
-      .then((json) => setRoutes(json));
-  }, []);
-
-  useEffect(() => {
-    (async () => {
-      const [, position] = await Promise.all([
-        googleMapsLoader.load(),
-        getCurrentPosition({ enableHighAccuracy: true }),
-      ]);
-
-      const divMap = document.getElementById("map") as HTMLElement;
-
-      googleMapsRef.current = new Map(divMap, {
-        zoom: 15,
-        center: position,
-      });
-    })();
-  }, []);
-
-  useEffect(() => {
-    socketIORef.current = io.connect(API_URL);
-
-    socketIORef.current.on("connect", () =>
-      console.log("socket successfully connected")
-    );
-
-    socketIORef.current.on(
-      "new-position",
-      (data: {
-        routeId: string;
-        position: [number, number];
-        finished: boolean;
-      }) => {
-        googleMapsRef.current?.moveCurrentMarker(data.routeId, {
-          lat: data.position[0],
-          lng: data.position[1],
-        });
-      }
-    );
-  }, []);
-
   const startRoute = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
@@ -150,6 +106,70 @@ export const Mapping: FunctionComponent = () => {
     },
     [routeIdSelected, routes, enqueueSnackbar]
   );
+
+  const finishRoute = useCallback(
+    (route: Route) => {
+      enqueueSnackbar(`Corrida ${route.title} finalizada com sucesso!`, {
+        variant: "success",
+      });
+    },
+    [enqueueSnackbar]
+  );
+
+  useEffect(() => {
+    fetch(`${API_URL}/routes`)
+      .then((data) => data.json())
+      .then((json) => setRoutes(json));
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const [, position] = await Promise.all([
+        googleMapsLoader.load(),
+        getCurrentPosition({ enableHighAccuracy: true }),
+      ]);
+
+      const divMap = document.getElementById("map") as HTMLElement;
+
+      googleMapsRef.current = new Map(divMap, {
+        zoom: 15,
+        center: position,
+      });
+    })();
+  }, []);
+
+  useEffect(() => {
+    const handlerNewPosition = (data: {
+      routeId: string;
+      position: [number, number];
+      finished: boolean;
+    }) => {
+      googleMapsRef.current?.moveCurrentMarker(data.routeId, {
+        lat: data.position[0],
+        lng: data.position[1],
+      });
+
+      const route = routes.find((route) => route._id === data.routeId) as Route;
+
+      if (data.finished) {
+        finishRoute(route);
+      }
+    };
+
+    if (!socketIORef.current?.connected) {
+      socketIORef.current = io.connect(API_URL);
+
+      socketIORef.current.on("connect", () =>
+        console.log("socket successfully connected")
+      );
+    }
+
+    socketIORef.current.on("new-position", handlerNewPosition);
+
+    return () => {
+      socketIORef.current?.off("new-position", handlerNewPosition);
+    };
+  }, [finishRoute, routes, routeIdSelected]);
 
   return (
     <Grid container className={classes.root}>
