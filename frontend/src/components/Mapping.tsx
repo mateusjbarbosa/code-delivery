@@ -15,6 +15,8 @@ import { sample, shuffle } from "lodash";
 
 import { useSnackbar } from "notistack";
 
+import io from "socket.io-client";
+
 import { Navbar } from "./Navbar";
 
 import { RouteExistsError } from "../errors/route-exists.error";
@@ -64,6 +66,7 @@ export const Mapping: FunctionComponent = () => {
   const [routeIdSelected, setRouteIdSelected] = useState<string>("");
 
   const googleMapsRef = useRef<Map>();
+  const socketIORef = useRef<SocketIOClient.Socket>();
 
   const { enqueueSnackbar } = useSnackbar();
 
@@ -89,6 +92,14 @@ export const Mapping: FunctionComponent = () => {
     })();
   }, []);
 
+  useEffect(() => {
+    socketIORef.current = io.connect(API_URL);
+
+    socketIORef.current.on("connect", () =>
+      console.log("socket successfully connected")
+    );
+  }, []);
+
   const startRoute = useCallback(
     (e: FormEvent) => {
       e.preventDefault();
@@ -107,6 +118,10 @@ export const Mapping: FunctionComponent = () => {
             position: route?.endPosition,
             icon: makeMarkerIcon(color),
           },
+        });
+
+        socketIORef.current?.emit("new-direction", {
+          routeId: routeIdSelected,
         });
       } catch (error) {
         if (error instanceof RouteExistsError) {
