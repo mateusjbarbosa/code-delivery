@@ -112,6 +112,8 @@ export const Mapping: FunctionComponent = () => {
       enqueueSnackbar(`Corrida ${route.title} finalizada com sucesso!`, {
         variant: "success",
       });
+
+      googleMapsRef.current?.removeRoute(route._id);
     },
     [enqueueSnackbar]
   );
