@@ -98,6 +98,20 @@ export const Mapping: FunctionComponent = () => {
     socketIORef.current.on("connect", () =>
       console.log("socket successfully connected")
     );
+
+    socketIORef.current.on(
+      "new-position",
+      (data: {
+        routeId: string;
+        position: [number, number];
+        finished: boolean;
+      }) => {
+        googleMapsRef.current?.moveCurrentMarker(data.routeId, {
+          lat: data.position[0],
+          lng: data.position[1],
+        });
+      }
+    );
   }, []);
 
   const startRoute = useCallback(
