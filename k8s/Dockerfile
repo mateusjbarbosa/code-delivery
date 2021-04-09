@@ -12,3 +12,11 @@ RUN curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packa
   tee /etc/apt/sources.list.d/kubernetes.list && \
   apt-get update && \
   apt-get install -y kubectl
+
+# helm installation
+RUN curl https://baltocdn.com/helm/signing.asc | apt-key add - && \
+  apt-get install apt-transport-https --yes && \
+  echo "deb https://baltocdn.com/helm/stable/debian/ all main" | \
+  tee /etc/apt/sources.list.d/helm-stable-debian.list && \
+  apt-get update && \
+  apt-get install helm
