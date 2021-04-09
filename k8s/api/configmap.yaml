@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-conf
+data:
+  env: |
+    MONGO_DSN=mongodb://root:root@mongodb/code-delivery-api?authSource=admin
+    KAFKA_CLIENT_ID=code-delivery
+    KAFKA_BROKER={{ CLUSTER_URL_SERVER }}
+    KAFKA_CONSUMER_GROUP_ID=code-delivery
+    KAFKA_SASL_USERNAME={{ CLUSTER_API_KEY }}
+    KAFKA_SASL_PASSWORD={{ CLUSTER_API_SECRET }}
